@@ -1,43 +1,66 @@
 ---
 # yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
-# image will be published to ghcr.io/<user>/<name>
 name: hyprland-modus-atomic
-# description will be included in the image's metadata
-description: This is my personal OS image.
+description: Hyprland with the Modus theme
 
-# the base image to build on top of (FROM) and the version tag to use
 base-image: ghcr.io/wayblueorg/hyprland
-image-version: latest # latest is also supported if you want new updates ASAP
+image-version: 42
 
-# module configuration, executed in order
-# you can include multiple instances of the same module
+stages:
+  - name: glace-builder
+    from: registry.fedoraproject.org/fedora:42
+    modules:
+      - type: dnf
+        install:
+          packages:
+            - git
+            - meson
+            - ninja-build
+            - gcc
+            - pkgconf-pkg-config
+            - gtk3-devel
+            - glib2-devel
+            - wayland-devel
+            - wayland-protocols-devel
+            - cmake
+            - gobject-introspection-devel
+            - vala
+      - type: script
+        snippets:
+          - |
+            set -euo pipefail
+            git clone https://github.com/Fabric-Development/glace /tmp/glace
+            mkdir /tmp/glace-out
+            # optional: pin a commit for reproducibility
+            # git checkout <commit>
+            cd /tmp/glace && meson setup build --prefix=/tmp/glace-out -Dbuildtype=release --wipe && ninja -C build install
+
 modules:
+  - type: copy
+    from: glace-builder
+    src: /tmp/glace-out
+    dest: /usr/
+
   # - type: files
   #   files:
   #     - source: system
   #       destination: / # copies files/system/* (* means everything inside it) into your image's root folder /
 
-  # - type: rpm-ostree
-  #   repos:
-  #     - https://copr.fedorainfracloud.org/coprs/atim/starship/repo/fedora-%OS_VERSION%/atim-starship-fedora-%OS_VERSION%.repo
-  #   install:
-  #     - micro
-  #     - starship
-  #   remove:
-  #     # example: removing firefox (in favor of the flatpak)
-  #     # "firefox" is the main package, "firefox-langpacks" is a dependency
-  #     - firefox
-  #     - firefox-langpacks # also remove firefox dependency (not required for all packages, this is a special case)
-  #
-  # - type: default-flatpaks
-  #   configurations:
-  #     - notify: true # Send notification after install/uninstall is finished (true/false)
-  #       scope: system
-  #       # If no repo information is specified, Flathub will be used by default
-  #       install: # system flatpaks we want all users to have and not remove
-  #         - org.mozilla.firefox
-  #         - org.gnome.Loupe
-  #     - scope: user # Also add Flathub user repo, but no user packages
+  - type: rpm-ostree
+    repos:
+        - https://copr.fedorainfracloud.org/coprs/mochaa/gtk-session-lock/repo/fedora-42/mochaa-gtk-session-lock-fedora-42.repo
+    install:
+        - p7zip
+        - gtk-session-lock
+        - python3-pyotp
+        - python3-pillow
+        - python3-ijson
+        - python3-setproctitle
+        - cinnamon-desktop
+        - gobject-introspection
+  - type: script
+    scripts:
+        - install-apple-fonts.sh
 
-  - type: signing # this sets up the proper policy & signing files for signed images to work fully
+  - type: signing
 
