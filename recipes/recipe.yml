@@ -45,6 +45,21 @@ modules:
       - p7zip
       - gtk-session-lock
 
+      # get rid of these
+      - gcc
+      - gcc-c++
+      - make
+      - pkgconf-pkg-config
+      - python3-devel
+      - cairo-devel
+      - pango-devel
+      - gdk-pixbuf2-devel
+      - libffi-devel
+      - glib2-devel
+      - gobject-introspection-devel
+      - cairo-devel
+      - cairo-gobject-devel
+
       # Hyprland ecosystem (COPR)
       # - hypridle
       # - hyprsunset
