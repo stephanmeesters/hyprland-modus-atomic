@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Modus
+Exec=uwsm app -- python /opt/Modus/main.py
+OnlyShowIn=Hyprland;
+X-GNOME-Autostart-enabled=true

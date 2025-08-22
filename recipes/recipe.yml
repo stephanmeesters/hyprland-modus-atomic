@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
 name: hyprland-modus-atomic
-description: Hyprland with the Modus theme
+description: Hyprland with the Modus theme (https://github.com/S4NKALP/Modus)
 
 base-image: ghcr.io/wayblueorg/hyprland
 image-version: 42
@@ -26,14 +26,8 @@ stages:
             - gobject-introspection-devel
             - vala
       - type: script
-        snippets:
-          - |
-            set -euo pipefail
-            git clone https://github.com/Fabric-Development/glace /tmp/glace
-            mkdir /tmp/glace-out
-            # optional: pin a commit for reproducibility
-            # git checkout <commit>
-            cd /tmp/glace && meson setup build --prefix=/tmp/glace-out -Dbuildtype=release --wipe && ninja -C build install
+        scripts:
+          - compile-glace.sh
 
 modules:
   - type: copy
@@ -41,26 +35,80 @@ modules:
     src: /tmp/glace-out
     dest: /usr/
 
-  # - type: files
-  #   files:
-  #     - source: system
-  #       destination: / # copies files/system/* (* means everything inside it) into your image's root folder /
-
   - type: rpm-ostree
     repos:
-        - https://copr.fedorainfracloud.org/coprs/mochaa/gtk-session-lock/repo/fedora-42/mochaa-gtk-session-lock-fedora-42.repo
+      - https://copr.fedorainfracloud.org/coprs/mochaa/gtk-session-lock/repo/fedora-42/mochaa-gtk-session-lock-fedora-42.repo
+      - https://copr.fedorainfracloud.org/coprs/solopasha/hyprland/repo/fedora-42/solopasha-hyprland-fedora-42.repo
+      - https://copr.fedorainfracloud.org/coprs/heus-sueh/packages/repo/fedora-42/heus-sueh-packages-fedora-42.repo
+
     install:
-        - p7zip
-        - gtk-session-lock
-        - python3-pyotp
-        - python3-pillow
-        - python3-ijson
-        - python3-setproctitle
-        - cinnamon-desktop
-        - gobject-introspection
+      - p7zip
+      - gtk-session-lock
+
+      # Hyprland ecosystem (COPR)
+      # - hypridle
+      # - hyprsunset
+      # - hyprpicker
+      - swww
+      - swappy
+      - uwsm
+      - wf-recorder
+      - cliphist
+      - matugen
+
+      # Desktop/libs
+      - cinnamon-desktop
+      - gobject-introspection
+      - gnome-bluetooth
+      - gnome-bluetooth-libs
+      - libnotify
+      - wl-clipboard
+      - webp-pixbuf-loader
+      - slurp
+      - playerctl
+      # - ffmpeg-free
+      - ImageMagick
+      - acpi
+      - brightnessctl
+      # - power-profiles-daemon
+      - zbar
+
+      # Python
+      - python3-fabric
+      - python3-gobject
+      - python3-pillow
+      - python3-setproctitle
+      - python3-toml
+      - python3-requests
+      - python3-numpy
+      - python3-pywayland
+      - python3-pyxdg
+      - python3-ijson
+      - python3-watchdog
+      - python3-pyotp
+      - python3-zbar
+      - python3-psutil
+      - python3-pydbus
+      - python3-fuzzywuzzy
+      - python3-pam
+      - python3-cairo
+      - python3-certifi
+      - python3-charset-normalizer
+      - python3-click
+      - python3-idna
+      - python3-loguru
+      - python3-rapidfuzz
+      - python3-urllib3
+
   - type: script
     scripts:
         - install-apple-fonts.sh
+        - install-modus-theme.sh
+
+  - type: files
+    files:
+      - source: system
+        destination: /
 
   - type: signing
 
